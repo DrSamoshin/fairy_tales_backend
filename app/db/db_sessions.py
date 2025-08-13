@@ -9,7 +9,6 @@ from cachetools import TTLCache
 from threading import Lock
 
 from app.core.configs import settings
-from app.services.authentication import get_user_id_from_token
 
 
 USERS_DB_ENGINES = TTLCache(maxsize=10, ttl=3600)

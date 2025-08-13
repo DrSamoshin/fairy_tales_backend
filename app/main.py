@@ -9,6 +9,9 @@ from app.api.endpoints.v1 import (
     router_health,
     router_admin,
     router_migration,
+    router_auth,
+    router_user,
+    router_stories,
 )
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -76,6 +79,10 @@ def custom_openapi():
 main_app.openapi = custom_openapi
 
 main_app.include_router(router_health, prefix="/api/v1")
+main_app.include_router(router_auth, prefix="/api/v1")
+main_app.include_router(router_user, prefix="/api/v1")
+main_app.include_router(router_stories, prefix="/api/v1")
+
 # admin
 if settings.run.ADMIN_MODE:
     main_app.include_router(router_admin, prefix="/api/v1")

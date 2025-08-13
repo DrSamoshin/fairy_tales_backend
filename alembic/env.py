@@ -16,6 +16,7 @@ from app.core.configs import settings
 from app.db.base_classes import BaseUser
 # Import all models to ensure they're registered with metadata
 from app.db.models.user import User
+from app.db.models.story import Story
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -54,7 +54,7 @@ class DataBase(BaseModel):
 
 
 class JWTToken(BaseModel):
-    JWT_SECRET_KEY: str = os.getenv("JWT_POINT_SECRET_KEY")
+    JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
     ALGORITHM: str = "HS256"
 
 
