@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+.env
+.git/
+.docker/
+docker/
+
+tests/
+docs/
+pytest.ini
+.DS_Store
