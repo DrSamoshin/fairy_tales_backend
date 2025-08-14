@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.responses import response
+from app.core import error_codes
 from app.db.db_sessions import get_users_db
 from app.schemas.user import UserRegister, UserLogin, AppleSignIn, Token, UserOut
 from app.schemas.response import AuthResponse, BaseResponse
@@ -20,12 +21,15 @@ async def register_user(
     """Register new user with email and password"""
     logging.info(f"Registering new user with email: {user_data.email}")
     
-    # Check if user already exists
-    existing_user = user_crud.get_by_email(db, user_data.email)
+    # Check if user already exists (normalize email to lowercase)
+    existing_user = user_crud.get_by_email(db, user_data.email.lower())
     if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
+        return response(
+            message="User already exists",
+            status_code=400,
+            success=False,
+            errors=["Email is already registered"],
+            error_code=error_codes.USER_EXISTS
         )
     
     # Hash password and create user
@@ -37,9 +41,9 @@ async def register_user(
     
     logging.info(f"User registered successfully: {user.id}")
     return response(
-        message="User registered successfully",
+        message="Registration successful",
         data={
-            "user": UserOut.model_validate(user),
+            "user": UserOut.model_validate(user).model_dump(mode='json'),
             "token": token_data
         }
     )
@@ -53,11 +57,28 @@ async def login_user(
     """Login user with email and password"""
     logging.info(f"User login attempt: {login_data.email}")
     
-    user = auth_service.authenticate_user(db, login_data.email, login_data.password)
+    # First check if user exists
+    normalized_email = login_data.email.lower()
+    user_exists = auth_service.check_user_exists(db, normalized_email)
+    
+    if not user_exists:
+        return response(
+            message="User not found",
+            status_code=401,
+            success=False,
+            errors=["No account found with this email"],
+            error_code=error_codes.USER_NOT_FOUND
+        )
+    
+    # User exists, now check password
+    user = auth_service.authenticate_user(db, normalized_email, login_data.password)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password"
+        return response(
+            message="The password you entered is incorrect",
+            status_code=401,
+            success=False,
+            errors=["Password does not match"],
+            error_code=error_codes.INVALID_PASSWORD
         )
     
     # Generate token
@@ -67,7 +88,7 @@ async def login_user(
     return response(
         message="Login successful",
         data={
-            "user": UserOut.model_validate(user),
+            "user": UserOut.model_validate(user).model_dump(mode='json'),
             "token": token_data
         }
     )
@@ -97,7 +118,7 @@ async def apple_signin(
     return response(
         message="Apple Sign In successful",
         data={
-            "user": UserOut.model_validate(user),
+            "user": UserOut.model_validate(user).model_dump(mode='json'),
             "token": token_data
         }
     )
@@ -106,7 +127,10 @@ async def apple_signin(
 @router.post("/logout", response_model=BaseResponse)
 async def logout_user():
     """Logout user (client should remove token)"""
-    return response(message="Logout successful")
+    return response(
+        message="Logged out successfully",
+        data=None
+    )
 
 
 @router.post("/refresh", response_model=AuthResponse)

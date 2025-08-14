@@ -25,3 +25,7 @@ class StoryResponse(BaseResponse):
 
 class UserProfileResponse(BaseResponse):
     data: dict  # Contains profile
+
+
+class UsersListResponse(BaseResponse):
+    data: dict  # Contains users list and pagination info

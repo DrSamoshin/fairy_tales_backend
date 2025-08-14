@@ -7,6 +7,9 @@ router = APIRouter(prefix="/health", tags=["health"])
 
 @router.get("/app/")
 async def get_health_check():
-    msg = "application is running"
+    msg = "Application is running"
     logging.info(msg)
-    return response(msg)
+    return response(
+        message=msg,
+        data={"status": "healthy", "service": "fairy_tales_backend"}
+    )

@@ -46,11 +46,24 @@ class AuthService:
     
     def verify_token(self, token: str) -> Optional[UUID]:
         try:
+            # For permanent tokens, we need to handle missing 'exp' claim
             payload = jwt.decode(
                 token,
                 settings.jwt_token.JWT_SECRET_KEY,
                 algorithms=[settings.jwt_token.ALGORITHM],
+                options={"verify_exp": False}  # Don't verify expiration
             )
+            
+            # Check expiration only if token has 'exp' claim (non-permanent tokens)
+            if "exp" in payload and not payload.get("permanent", False):
+                # Re-verify with expiration check for regular tokens
+                jwt.decode(
+                    token,
+                    settings.jwt_token.JWT_SECRET_KEY,
+                    algorithms=[settings.jwt_token.ALGORITHM],
+                    options={"verify_exp": True}
+                )
+            
             user_id_str = payload.get("sub")
             if user_id_str is None:
                 return None
@@ -67,6 +80,10 @@ class AuthService:
         if not self.verify_password(password, user.password_hash):
             return False
         return user
+    
+    def check_user_exists(self, db: Session, email: str):
+        """Check if user exists by email"""
+        return user_crud.get_by_email(db, email) is not None
 
 
 auth_service = AuthService()

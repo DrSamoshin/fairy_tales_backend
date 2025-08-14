@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.responses import response
+from app.core import error_codes
 from app.db.db_sessions import get_users_db
 from app.schemas.user import UserUpdate, UserProfile
 from app.schemas.response import UserProfileResponse
@@ -27,8 +28,8 @@ async def get_user_profile(
     profile_data.stories_count = stories_count
     
     return response(
-        message="Profile retrieved successfully",
-        data={"profile": profile_data}
+        message="Profile retrieved successfully", 
+        data={"profile": profile_data.model_dump(mode='json')}
     )
 
 
@@ -45,11 +46,13 @@ async def update_user_profile(
     if not updated_user:
         return response(
             message="Failed to update profile",
-            status_code=400,
-            success=False
+            status_code=500,
+            success=False,
+            errors=["Profile update failed"],
+            error_code=error_codes.INTERNAL_ERROR
         )
     
     return response(
         message="Profile updated successfully",
-        data={"user": UserProfile.model_validate(updated_user)}
+        data={"user": UserProfile.model_validate(updated_user).model_dump(mode='json')}
     )

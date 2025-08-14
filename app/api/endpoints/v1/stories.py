@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.core.responses import response
+from app.core import error_codes
 from app.db.db_sessions import get_users_db
 from app.schemas.story import (
     StoryGenerate, StoryCreate, StoryUpdate, StoryOut, 
@@ -46,7 +47,7 @@ async def generate_story(
     logging.info(f"Story generated and saved: {story.id}")
     return response(
         message="Story generated successfully",
-        data={"story": StoryOut.model_validate(story)}
+        data={"story": StoryOut.model_validate(story).model_dump(mode='json')}
     )
 
 
@@ -66,7 +67,7 @@ async def get_user_stories(
     
     return response(
         message="Stories retrieved successfully",
-        data=StoriesResponse(stories=stories_list, total=total)
+        data=StoriesResponse(stories=stories_list, total=total).model_dump(mode='json')
     )
 
 
@@ -81,14 +82,17 @@ async def get_story(
     
     story = story_crud.get_by_id(db, story_id, current_user.id)
     if not story:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Story not found"
+        return response(
+            message="Story not found",
+            status_code=404,
+            success=False,
+            errors=["Story does not exist or you don't have permission to view it"],
+            error_code=error_codes.STORY_NOT_FOUND
         )
     
     return response(
         message="Story retrieved successfully",
-        data={"story": StoryOut.model_validate(story)}
+        data={"story": StoryOut.model_validate(story).model_dump(mode='json')}
     )
 
 
@@ -104,14 +108,17 @@ async def update_story(
     
     story = story_crud.update(db, story_id, current_user.id, story_update)
     if not story:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Story not found"
+        return response(
+            message="Story not found",
+            status_code=404,
+            success=False,
+            errors=["Story does not exist or you don't have permission to update it"],
+            error_code=error_codes.STORY_NOT_FOUND
         )
     
     return response(
         message="Story updated successfully",
-        data={"story": StoryOut.model_validate(story)}
+        data={"story": StoryOut.model_validate(story).model_dump(mode='json')}
     )
 
 
@@ -126,9 +133,15 @@ async def delete_story(
     
     success = story_crud.delete(db, story_id, current_user.id)
     if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Story not found"
+        return response(
+            message="Story not found",
+            status_code=404,
+            success=False,
+            errors=["Story does not exist or you don't have permission to delete it"],
+            error_code=error_codes.STORY_NOT_FOUND
         )
     
-    return response(message="Story deleted successfully")
+    return response(
+        message="Story deleted successfully",
+        data=None
+    )

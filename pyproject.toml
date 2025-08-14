@@ -22,5 +22,6 @@ dependencies = [
     "pandas>=2.3.0",
     "pre-commit>=4.2.0",
     "passlib[bcrypt]>=1.7.4",
+    "bcrypt>=4.0.0",
     "email-validator>=2.1.0",
 ]

@@ -15,7 +15,7 @@ class UserCRUD:
     
     def get_by_email(self, db: Session, email: str) -> Optional[User]:
         return db.query(User).filter(
-            User.email == email, 
+            User.email == email.lower(), 
             User.is_active == True
         ).first()
     
@@ -27,7 +27,7 @@ class UserCRUD:
     
     def create_email_user(self, db: Session, user: UserRegister, password_hash: str) -> User:
         db_user = User(
-            email=user.email,
+            email=user.email.lower(),
             password_hash=password_hash,
             name=user.name
         )
@@ -67,6 +67,9 @@ class UserCRUD:
         db_user.is_active = False
         db.commit()
         return True
+    
+    def get_all(self, db: Session, skip: int = 0, limit: int = 100) -> list[User]:
+        return db.query(User).filter(User.is_active == True).offset(skip).limit(limit).all()
     
     def get_stories_count(self, db: Session, user_id: UUID) -> int:
         return db.query(func.count()).select_from(User).join(User.stories).filter(
