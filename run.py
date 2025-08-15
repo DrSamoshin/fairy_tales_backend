@@ -1,11 +1,10 @@
 import logging
 import uvicorn
 from app.core.configs import settings
-from app.db.db_sessions import check_users_db_availability
+
 
 
 def run():
-    check_users_db_availability()
     logging.info("check DB")
     try:
         uvicorn.run(
