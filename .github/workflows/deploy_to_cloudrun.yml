@@ -19,16 +19,16 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v1
         with:
-          credentials_json: ${{ secrets.GCLOUD_SA_KEY }}
+          credentials_json: ${{ .secrets.GCLOUD_SA_KEY }}
 
       - name: Deploy to Cloud Run
         uses: google-github-actions/deploy-cloudrun@v1
         with:
           service: coffee-point-api
-          image: europe-west3-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT_ID }}/coffee-point-crm/coffee-point-crm:latest
+          image: europe-west3-docker.pkg.dev/${{ .secrets.GCLOUD_PROJECT_ID }}/coffee-point-crm/coffee-point-crm:latest
           region: europe-west3
           allow_unauthenticated: true
-          add_cloudsql_instances: ${{ secrets.INSTANCE_CONNECTION_NAME }}
+          add_cloudsql_instances: ${{ .secrets.INSTANCE_CONNECTION_NAME }}
           memory: 1Gi
           env_vars: |
             ADMIN_MODE=${{ github.event.inputs.admin_mode }}

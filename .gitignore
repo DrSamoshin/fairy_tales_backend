@@ -140,7 +140,7 @@ ehthumbs.db
 Thumbs.db
 
 # Project specific
-.secrets
+.secrets/
 .ruff_cache/
 pip-log.txt
 pip-delete-this-directory.txt
