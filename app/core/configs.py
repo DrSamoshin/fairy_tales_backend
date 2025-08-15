@@ -4,6 +4,7 @@ load_dotenv()
 
 import logging
 import os
+from urllib.parse import quote_plus
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings
 
@@ -41,7 +42,7 @@ class DataBase(BaseModel):
     DB_HOST: str = os.getenv("DB_HOST", "localhost")
     DB_PORT: str = os.getenv("DB_PORT", "5432")
     DB_USER: str = os.getenv("DB_USER")
-    DB_PASS: str = os.getenv("DB_PASS")  # should be without special symbols
+    DB_PASS: str = os.getenv("DB_PASS")  # now supports special symbols (URL-encoded)
     
     # Connection pool settings
     DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "10"))
@@ -51,13 +52,17 @@ class DataBase(BaseModel):
     DB_CONNECT_TIMEOUT: int = int(os.getenv("DB_CONNECT_TIMEOUT", "10"))
 
     def get_db_url(self, db_name: str) -> str:
+        # URL-encode password to handle special characters like @
+        encoded_password = quote_plus(self.DB_PASS) if self.DB_PASS else ""
+        encoded_user = quote_plus(self.DB_USER) if self.DB_USER else ""
+        
         if self.USE_CLOUD_SQL_PROXY:
             return (
-                f"postgresql+psycopg2://{self.DB_USER}:{self.DB_PASS}@/{db_name}"
+                f"postgresql+psycopg2://{encoded_user}:{encoded_password}@/{db_name}"
                 f"?host=/cloudsql/{self.INSTANCE_CONNECTION_NAME}"
             )
         else:
-            return f"postgresql+psycopg2://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{db_name}"
+            return f"postgresql+psycopg2://{encoded_user}:{encoded_password}@{self.DB_HOST}:{self.DB_PORT}/{db_name}"
 
 
 class JWTToken(BaseModel):
