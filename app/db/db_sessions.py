@@ -1,8 +1,7 @@
 import logging
 import os
-from uuid import UUID
 from functools import wraps
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import OperationalError
