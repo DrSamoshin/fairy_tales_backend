@@ -14,7 +14,7 @@ from app.db.models.user import User
 router = APIRouter(prefix="/user", tags=["user"])
 
 
-@router.get("/profile", response_model=UserProfileResponse)
+@router.get("/profile/", response_model=UserProfileResponse)
 async def get_user_profile(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_users_db)
@@ -33,7 +33,7 @@ async def get_user_profile(
     )
 
 
-@router.put("/profile", response_model=UserProfileResponse)
+@router.put("/profile/", response_model=UserProfileResponse)
 async def update_user_profile(
     user_update: UserUpdate,
     current_user: User = Depends(get_current_user),

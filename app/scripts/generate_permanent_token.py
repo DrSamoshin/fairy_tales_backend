@@ -7,7 +7,7 @@ The script will prompt for User ID input.
 
 import sys
 import jwt
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import UUID
 from pathlib import Path
 
@@ -26,7 +26,7 @@ def generate_permanent_token(user_id: str) -> str:
         # Create token payload without expiration
         to_encode = {
             "sub": str(user_uuid),
-            "iat": datetime.utcnow(),
+            "iat": datetime.now(timezone.utc),
             "permanent": True  # Flag to indicate this is a permanent token
         }
         
@@ -68,12 +68,12 @@ def main():
             token = generate_permanent_token(user_id)
             
             print("\n" + "="*60)
-            print("✅ PERMANENT JWT TOKEN GENERATED")
+            print("PERMANENT JWT TOKEN GENERATED")
             print("="*60)
             print(f"User ID: {user_id}")
             print(f"Token: {token}")
             print("="*60)
-            print("⚠️  WARNING: This token does not expire!")
+            print("WARNING: This token does not expire!")
             print("Store it securely and revoke if compromised.")
             print("="*60)
             
@@ -87,7 +87,7 @@ def main():
             print("\n\nOperation cancelled by user.")
             sys.exit(0)
         except Exception as e:
-            print(f"❌ Error: {str(e)}")
+            print(f"Error: {str(e)}")
             print("Please try again with a valid UUID format.")
             print("Example: b9667bcd-0a1a-4008-8d17-347d0606552f")
             continue

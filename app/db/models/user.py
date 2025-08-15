@@ -21,8 +21,17 @@ class User(BaseUser):
     stories = relationship("Story", back_populates="user", cascade="all, delete-orphan")
 
     __table_args__ = (
+        # Composite indexes for authentication queries
         Index('ix_users_email_active', 'email', 'is_active'),
         Index('ix_users_apple_id_active', 'apple_id', 'is_active'),
+        
+        # Additional performance indexes
+        Index('ix_users_created_at', 'created_at'),
+        Index('ix_users_active_created', 'is_active', 'created_at'),
+        
+        # Partial index for active users only
+        Index('ix_users_active_only', 'email', 'created_at',
+              postgresql_where=Column('is_active') == True),
     )
 
     def __repr__(self):

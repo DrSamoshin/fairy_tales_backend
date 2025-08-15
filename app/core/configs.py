@@ -42,6 +42,13 @@ class DataBase(BaseModel):
     DB_PORT: str = os.getenv("DB_PORT", "5432")
     DB_USER: str = os.getenv("DB_USER")
     DB_PASS: str = os.getenv("DB_PASS")  # should be without special symbols
+    
+    # Connection pool settings
+    DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "10"))
+    DB_MAX_OVERFLOW: int = int(os.getenv("DB_MAX_OVERFLOW", "20"))
+    DB_POOL_TIMEOUT: int = int(os.getenv("DB_POOL_TIMEOUT", "30"))
+    DB_POOL_RECYCLE: int = int(os.getenv("DB_POOL_RECYCLE", "3600"))
+    DB_CONNECT_TIMEOUT: int = int(os.getenv("DB_CONNECT_TIMEOUT", "10"))
 
     def get_db_url(self, db_name: str) -> str:
         if self.USE_CLOUD_SQL_PROXY:
@@ -58,12 +65,30 @@ class JWTToken(BaseModel):
     ALGORITHM: str = "HS256"
 
 
+class OpenAI(BaseModel):
+    API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    MODEL: str = "gpt-4o-mini"
+    MAX_TOKENS: int = 1500
+    TEMPERATURE: float = 0.7
+
+
+class AppleSignIn(BaseModel):
+    TEAM_ID: str = os.getenv("APPLE_TEAM_ID", "")
+    KEY_ID: str = os.getenv("APPLE_KEY_ID", "")
+    CLIENT_ID: str = os.getenv("APPLE_CLIENT_ID", "")
+    PRIVATE_KEY_PATH: str = os.getenv("APPLE_PRIVATE_KEY_PATH", "")
+    # Alternative: store private key content directly
+    PRIVATE_KEY_CONTENT: str = os.getenv("APPLE_PRIVATE_KEY_CONTENT", "")
+
+
 class Settings(BaseSettings):
     logging: Logging = Logging()
     run: Run = Run()
     app_data: AppData = AppData()
     data_base: DataBase = DataBase()
     jwt_token: JWTToken = JWTToken()
+    openai: OpenAI = OpenAI()
+    apple_signin: AppleSignIn = AppleSignIn()
 
 
 settings = Settings()

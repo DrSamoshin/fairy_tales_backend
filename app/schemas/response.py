@@ -29,3 +29,7 @@ class UserProfileResponse(BaseResponse):
 
 class UsersListResponse(BaseResponse):
     data: dict  # Contains users list and pagination info
+
+
+class PolicyResponse(BaseResponse):
+    data: dict  # Contains policy content

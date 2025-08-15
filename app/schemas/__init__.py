@@ -3,19 +3,19 @@ from .user import (
     UserOut, UserProfile, Token, TokenData
 )
 from .story import (
-    StoryGenerate, StoryCreate, StoryUpdate, StoryOut, 
+    StoryGenerate, StoryCreate, StoryOut, 
     StoryList, StoriesResponse
 )
 from .response import (
     BaseResponse, DataResponse, AuthResponse, 
-    StoriesListResponse, StoryResponse, UserProfileResponse
+    StoriesListResponse, StoryResponse, UserProfileResponse, PolicyResponse
 )
 
 __all__ = [
     "UserRegister", "UserLogin", "AppleSignIn", "UserUpdate",
     "UserOut", "UserProfile", "Token", "TokenData",
-    "StoryGenerate", "StoryCreate", "StoryUpdate", "StoryOut",
+    "StoryGenerate", "StoryCreate", "StoryOut",
     "StoryList", "StoriesResponse",
     "BaseResponse", "DataResponse", "AuthResponse", 
-    "StoriesListResponse", "StoryResponse", "UserProfileResponse"
+    "StoriesListResponse", "StoryResponse", "UserProfileResponse", "PolicyResponse"
 ]

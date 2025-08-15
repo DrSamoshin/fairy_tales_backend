@@ -13,7 +13,7 @@ from app.services.authentication import auth_service, get_current_user
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/register", response_model=AuthResponse)
+@router.post("/register/", response_model=AuthResponse)
 async def register_user(
     user_data: UserRegister,
     db: Session = Depends(get_users_db)
@@ -49,7 +49,7 @@ async def register_user(
     )
 
 
-@router.post("/login", response_model=AuthResponse)
+@router.post("/login/", response_model=AuthResponse)
 async def login_user(
     login_data: UserLogin,
     db: Session = Depends(get_users_db)
@@ -94,7 +94,7 @@ async def login_user(
     )
 
 
-@router.post("/apple-signin", response_model=AuthResponse)
+@router.post("/apple-signin/", response_model=AuthResponse)
 async def apple_signin(
     apple_data: AppleSignIn,
     db: Session = Depends(get_users_db)
@@ -124,7 +124,7 @@ async def apple_signin(
     )
 
 
-@router.post("/logout", response_model=BaseResponse)
+@router.post("/logout/", response_model=BaseResponse)
 async def logout_user():
     """Logout user (client should remove token)"""
     return response(
@@ -133,7 +133,7 @@ async def logout_user():
     )
 
 
-@router.post("/refresh", response_model=AuthResponse)
+@router.post("/refresh/", response_model=AuthResponse)
 async def refresh_token(
     current_user = Depends(get_current_user)
 ):

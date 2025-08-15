@@ -5,6 +5,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from app.core.configs import settings
+from app.middleware.database_monitoring import DatabaseMonitoringMiddleware
 from app.api.endpoints.v1 import (
     router_health,
     router_admin,
@@ -12,6 +13,7 @@ from app.api.endpoints.v1 import (
     router_auth,
     router_user,
     router_stories,
+    router_legal,
 )
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -20,6 +22,10 @@ main_app = FastAPI(
     openapi_version=settings.app_data.openapi_version,
 )
 
+# Add database monitoring middleware
+main_app.add_middleware(DatabaseMonitoringMiddleware)
+
+# Add CORS middleware
 main_app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -82,6 +88,7 @@ main_app.include_router(router_health, prefix="/api/v1")
 main_app.include_router(router_auth, prefix="/api/v1")
 main_app.include_router(router_user, prefix="/api/v1")
 main_app.include_router(router_stories, prefix="/api/v1")
+main_app.include_router(router_legal, prefix="/api/v1")
 
 # admin
 if settings.run.ADMIN_MODE:

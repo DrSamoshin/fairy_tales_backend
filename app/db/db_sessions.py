@@ -1,8 +1,9 @@
 import logging
+import os
 from uuid import UUID
 from functools import wraps
 from fastapi import HTTPException, Depends
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import OperationalError
 from cachetools import TTLCache
@@ -19,24 +20,50 @@ point_engine_lock = Lock()
 user_engine_lock = Lock()
 
 
-def _create_db_engine(url: str, pool_size: int = 3, max_overflow: int = 1):
-    logging.info("call method _create_db_engine")
+def _create_db_engine(url: str, pool_size: int = None, max_overflow: int = None):
+    logging.info("Creating database engine with optimized settings")
+    
+    # Use settings from config if not provided
+    if pool_size is None:
+        pool_size = settings.data_base.DB_POOL_SIZE
+    if max_overflow is None:
+        max_overflow = settings.data_base.DB_MAX_OVERFLOW
+    
     try:
         db_engine = create_engine(
             url,
+            # Connection pool optimization
             pool_size=pool_size,
             max_overflow=max_overflow,
-            pool_timeout=30,
-            pool_recycle=1800,
-            pool_pre_ping=True,
-            connect_args={"connect_timeout": 3},
+            pool_timeout=settings.data_base.DB_POOL_TIMEOUT,
+            pool_recycle=settings.data_base.DB_POOL_RECYCLE,
+            pool_pre_ping=True,  # Enables pessimistic disconnect handling
+            
+            # Connection settings
+            connect_args={
+                "connect_timeout": settings.data_base.DB_CONNECT_TIMEOUT,
+                "options": "-c timezone=utc"  # Set timezone
+            },
+            
+            # Echo SQL queries in development (can be controlled via env)
+            echo=os.getenv("DB_ECHO", "false").lower() == "true",
+            
+            # Connection event handling
+            pool_reset_on_return="commit",  # Reset connections on return
         )
-    except Exception:
+        
+        # Test the connection
+        with db_engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+            
+    except Exception as e:
+        logging.error(f"Failed to create database engine: {str(e)}")
         raise HTTPException(
-            status_code=500, detail="DB engine is not created. db_url: {url}"
+            status_code=500, 
+            detail=f"Database engine creation failed: {str(e)}"
         )
     else:
-        logging.info(f"db engine: {db_engine}, db_url: {url}")
+        logging.info(f"Database engine created successfully with pool_size={pool_size}, max_overflow={max_overflow}")
         return db_engine
 
 
@@ -74,7 +101,7 @@ def _get_users_db_engine():
         if not USERS_DB_ENGINES.get("users"):
             try:
                 users_db_engine = _create_db_engine(
-                    settings.data_base.get_db_url("users"), 3, 2
+                    settings.data_base.get_db_url("users")
                 )
             except Exception as error:
                 raise error
