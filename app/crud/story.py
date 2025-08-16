@@ -1,9 +1,11 @@
-from typing import List, Optional, Tuple, TYPE_CHECKING
+import logging
+from typing import List, Optional, Tuple, TYPE_CHECKING, AsyncGenerator, Dict, Any
 from uuid import UUID
 from sqlalchemy.orm import Session, selectinload, joinedload
 from sqlalchemy import func, desc, select, and_
 from app.db.models.story import Story
-from app.schemas.story import StoryCreate
+from app.schemas.story import StoryGenerateRequest, StoryOut
+from app.services.story_generation import story_generation_service
 
 if TYPE_CHECKING:
     from app.schemas.story import StoryGenerate
@@ -58,40 +60,123 @@ class StoryCRUD:
         
         return stories, total
     
-    def create(self, db: Session, story: StoryCreate, user_id: UUID) -> Story:
+
+    
+    def create_from_generation(
+        self, 
+        db: Session, 
+        story_data: StoryGenerateRequest, 
+        generated_content: str, 
+        user_id: UUID
+    ) -> Story:
+        """Create story from client parameters + AI generated content"""
+        # AI только добавляет content, все остальное от клиента
         db_story = Story(
             user_id=user_id,
-            title=story.title,
-            content=story.content,
-            hero_name=story.hero_name,
-            age=story.age,
-            story_style=story.story_style,
-            language=story.language,
-            story_idea=story.story_idea
+            title=story_data.story_name,
+            content=generated_content,  # ✅ Единственное что добавляет AI
+            hero_name=story_data.hero_name,
+            age=story_data.age,
+            story_style=story_data.story_style.value,
+            language=story_data.language.value,
+            story_idea=story_data.story_idea,
+            story_length=story_data.story_length.value,
+            child_gender=story_data.child_gender.value
+            # id, created_at, is_deleted - автоматически из модели
         )
         db.add(db_story)
         db.commit()
         db.refresh(db_story)
         return db_story
     
-    def create_from_generation(
+    async def generate_story_complete(
         self, 
         db: Session, 
-        story_data: 'StoryGenerate', 
-        generated_content: str, 
+        story_data: StoryGenerateRequest, 
         user_id: UUID
     ) -> Story:
-        """Create story from generation parameters and LLM content"""
-        story_create = StoryCreate(
-            title=story_data.story_name,
-            content=generated_content,
-            hero_name=story_data.hero_name,
-            age=story_data.age,
-            story_style=story_data.story_style.value,
-            language=story_data.language.value,
-            story_idea=story_data.story_idea
-        )
-        return self.create(db, story_create, user_id)
+        """Generate complete story and save to database"""
+        logging.info(f"Generating complete story for user: {user_id}")
+        logging.info(f"Story details: {story_data.story_name}, Hero: {story_data.hero_name}, Age: {story_data.age}, Style: {story_data.story_style}")
+        
+        try:
+            # Generate story content using service
+            generated_content = await story_generation_service.generate_story(story_data)
+            
+            # Create and save story
+            story = self.create_from_generation(db, story_data, generated_content, user_id)
+            
+            logging.info(f"Story generated and saved: {story.id}")
+            return story
+            
+        except Exception as e:
+            logging.error(f"Story generation/save failed for user {user_id}: {str(e)}")
+            raise Exception(f"Failed to generate story: {str(e)}")
+    
+    async def generate_story_stream(
+        self, 
+        db: Session, 
+        story_data: StoryGenerateRequest, 
+        user_id: UUID
+    ) -> AsyncGenerator[dict, None]:
+        """Generate story with streaming and save when complete"""
+        logging.info(f"Starting streaming generation for user: {user_id}")
+        logging.info(f"Story details: {story_data.story_name}, Hero: {story_data.hero_name}")
+        
+        full_story_content = ""
+        story_saved = False
+        
+        try:
+            # Send initial message
+            yield {
+                "type": "started",
+                "message": f"Starting generation of '{story_data.story_name}'"
+            }
+            
+            # Generate story with streaming
+            async for chunk in story_generation_service.generate_story_stream(story_data):
+                # Accumulate full story content
+                full_story_content += chunk
+                
+                # Yield chunk to client
+                yield {
+                    "type": "content",
+                    "data": chunk
+                }
+            
+            # Story generation completed - save to database
+            if full_story_content:
+                logging.info(f"Saving completed story to database for user: {user_id}")
+                
+                # Save to database
+                saved_story = self.create_from_generation(db, story_data, full_story_content, user_id)
+                story_saved = True
+                
+                # Send completion message with story ID
+                yield {
+                    "type": "completed",
+                    "story_id": str(saved_story.id),
+                    "message": "Story generated and saved successfully",
+                    "story_length": len(full_story_content)
+                }
+                
+                logging.info(f"Story saved successfully with ID: {saved_story.id}")
+            
+        except Exception as e:
+            logging.error(f"Error during streaming generation: {str(e)}")
+            
+            # Send error message
+            yield {
+                "type": "error",
+                "message": f"Generation failed: {str(e)}"
+            }
+        
+        finally:
+            # Log completion status
+            if story_saved:
+                logging.info(f"Streaming generation completed and saved for user: {user_id}")
+            else:
+                logging.info(f"Streaming generation completed but not saved for user: {user_id}")
     
 
     def delete(self, db: Session, story_id: UUID, user_id: UUID) -> bool:
@@ -169,6 +254,59 @@ class StoryCRUD:
         stories = query.offset(skip).limit(limit).all()
         
         return stories, total
+    
+    def get_stories_for_admin(
+        self, 
+        db: Session, 
+        skip: int = 0, 
+        limit: int = 100
+    ) -> Dict[str, Any]:
+        """
+        Get all stories for admin with structured response.
+        
+        Args:
+            db: Database session
+            skip: Number of stories to skip
+            limit: Maximum number of stories to return
+            
+        Returns:
+            Dict with success status, message, and structured data
+        """
+        logger = logging.getLogger(__name__)
+        logger.info(f"Admin requesting all stories with skip={skip}, limit={limit}")
+        
+        try:
+            # Get stories from database
+            stories, total = self.get_all_stories(db, skip=skip, limit=limit)
+            
+            # Convert stories to StoryOut format
+            stories_data = [StoryOut.model_validate(story).model_dump(mode='json') for story in stories]
+            
+            logger.info(f"Retrieved {len(stories_data)} stories out of {total} total")
+            
+            return {
+                "success": True,
+                "message": f"Retrieved {len(stories_data)} stories",
+                "data": {
+                    "stories": stories_data,
+                    "pagination": {
+                        "skip": skip,
+                        "limit": limit,
+                        "count": len(stories_data),
+                        "total": total
+                    }
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting stories for admin: {str(e)}")
+            return {
+                "success": False,
+                "message": "Internal server error",
+                "status_code": 500,
+                "errors": ["Failed to retrieve stories"],
+                "error_code": "INTERNAL_ERROR"
+            }
 
 
 story_crud = StoryCRUD()

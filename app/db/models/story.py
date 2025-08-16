@@ -17,9 +17,10 @@ class Story(BaseUser):
     story_style = Column(String, nullable=False)
     language = Column(String, nullable=False)
     story_idea = Column(Text, nullable=False)
+    story_length = Column(Integer, nullable=False, default=3)
+    child_gender = Column(String, nullable=False)
     is_deleted = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
-    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc), nullable=False)
     
     # Relationships
     user = relationship("User", back_populates="stories")
@@ -35,6 +36,8 @@ class Story(BaseUser):
         Index('ix_stories_language', 'language'),
         Index('ix_stories_style', 'story_style'),
         Index('ix_stories_age', 'age'),
+        Index('ix_stories_length', 'story_length'),
+        Index('ix_stories_gender', 'child_gender'),
         
         # Partial indexes for performance
         Index('ix_stories_active_only', 'user_id', 'created_at', 

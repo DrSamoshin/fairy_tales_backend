@@ -43,6 +43,7 @@ class DataBase(BaseModel):
     DB_PORT: str = os.getenv("DB_PORT", "5432")
     DB_USER: str = os.getenv("DB_USER")
     DB_PASS: str = os.getenv("DB_PASS")  # now supports special symbols (URL-encoded)
+    DB_NAME: str = os.getenv("DB_NAME", "fairy_tales")
     
     # Connection pool settings
     DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", "10"))
@@ -51,18 +52,18 @@ class DataBase(BaseModel):
     DB_POOL_RECYCLE: int = int(os.getenv("DB_POOL_RECYCLE", "3600"))
     DB_CONNECT_TIMEOUT: int = int(os.getenv("DB_CONNECT_TIMEOUT", "10"))
 
-    def get_db_url(self, db_name: str) -> str:
+    def get_db_url(self) -> str:
         # URL-encode password to handle special characters like @
         encoded_password = quote_plus(self.DB_PASS) if self.DB_PASS else ""
         encoded_user = quote_plus(self.DB_USER) if self.DB_USER else ""
         
         if self.USE_CLOUD_SQL_PROXY:
             return (
-                f"postgresql+psycopg2://{encoded_user}:{encoded_password}@/{db_name}"
+                f"postgresql+psycopg2://{encoded_user}:{encoded_password}@/{self.DB_NAME}"
                 f"?host=/cloudsql/{self.INSTANCE_CONNECTION_NAME}"
             )
         else:
-            return f"postgresql+psycopg2://{encoded_user}:{encoded_password}@{self.DB_HOST}:{self.DB_PORT}/{db_name}"
+            return f"postgresql+psycopg2://{encoded_user}:{encoded_password}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
 
 class JWTToken(BaseModel):
@@ -78,12 +79,20 @@ class OpenAI(BaseModel):
 
 
 class AppleSignIn(BaseModel):
-    TEAM_ID: str = os.getenv("APPLE_TEAM_ID", "")
-    KEY_ID: str = os.getenv("APPLE_KEY_ID", "")
-    CLIENT_ID: str = os.getenv("APPLE_CLIENT_ID", "")
+    # iOS App Configuration
+    TEAM_ID: str = os.getenv("APPLE_TEAM_ID", "AWDSZNV22L")
+    BUNDLE_ID: str = os.getenv("APPLE_BUNDLE_ID", "com.samoshynsiarhei.FairyTales")
+    
+    # Web Services Configuration (optional for Sign in with Apple for Web)
+    SERVICES_ID: str = os.getenv("APPLE_SERVICES_ID", "")  # For web sign in
+    KEY_ID: str = os.getenv("APPLE_KEY_ID", "")           # For generating tokens
     PRIVATE_KEY_PATH: str = os.getenv("APPLE_PRIVATE_KEY_PATH", "")
-    # Alternative: store private key content directly
     PRIVATE_KEY_CONTENT: str = os.getenv("APPLE_PRIVATE_KEY_CONTENT", "")
+    
+    # Token Verification Settings
+    APPLE_KEYS_URL: str = "https://appleid.apple.com/auth/keys"
+    APPLE_ISSUER: str = "https://appleid.apple.com"
+    TOKEN_CACHE_TTL: int = int(os.getenv("APPLE_TOKEN_CACHE_TTL", "3600"))  # 1 hour
 
 
 class Settings(BaseSettings):

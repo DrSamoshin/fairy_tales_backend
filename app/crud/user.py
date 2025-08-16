@@ -1,9 +1,11 @@
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Dict, Any
 from uuid import UUID
 from sqlalchemy.orm import Session, selectinload, joinedload
 from sqlalchemy import func, select, and_, desc
 from app.db.models.user import User
-from app.schemas.user import UserRegister, AppleSignIn, UserUpdate
+from app.schemas.user import AppleSignIn, UserOut
+from app.schemas.response import UsersListData
+import logging
 
 
 class UserCRUD:
@@ -49,40 +51,30 @@ class UserCRUD:
         
         return query.first()
     
-    def create_email_user(self, db: Session, user: UserRegister, password_hash: str) -> User:
-        db_user = User(
-            email=user.email.lower(),
-            password_hash=password_hash,
-            name=user.name
-        )
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
-        return db_user
-    
-    def create_apple_user(self, db: Session, user: AppleSignIn) -> User:
+
+    def create_apple_user(self, db: Session, user: AppleSignIn, email: Optional[str] = None) -> User:
+        """Create new Apple user with minimal required data"""
         db_user = User(
             apple_id=user.apple_id,
-            name=user.name
+            email=email  # From Apple token verification (optional)
         )
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
         return db_user
     
-    def update(self, db: Session, user_id: UUID, user_update: UserUpdate) -> Optional[User]:
+    def update_user_email(self, db: Session, user_id: UUID, email: Optional[str]) -> Optional[User]:
+        """Update user email from Apple token verification"""
         db_user = self.get_by_id(db, user_id)
         if not db_user:
             return None
         
-        update_data = user_update.model_dump(exclude_unset=True)
-        for field, value in update_data.items():
-            setattr(db_user, field, value)
-        
+        db_user.email = email
         db.commit()
         db.refresh(db_user)
         return db_user
     
+
     def deactivate(self, db: Session, user_id: UUID) -> bool:
         db_user = self.get_by_id(db, user_id)
         if not db_user:
@@ -157,6 +149,59 @@ class UserCRUD:
             })
         
         return users_with_counts, total
+    
+    def get_users_for_admin(
+        self, 
+        db: Session, 
+        skip: int = 0, 
+        limit: int = 100
+    ) -> Dict[str, Any]:
+        """
+        Get users list for admin with structured response.
+        
+        Args:
+            db: Database session
+            skip: Number of users to skip
+            limit: Maximum number of users to return
+            
+        Returns:
+            Dict with success status, message, and structured data
+        """
+        logger = logging.getLogger(__name__)
+        logger.info(f"Admin requesting users list with skip={skip}, limit={limit}")
+        
+        try:
+            # Get users from database
+            users, total = self.get_all(db, skip=skip, limit=limit)
+            
+            # Convert users to UserOut format
+            users_data = [UserOut.model_validate(user).model_dump(mode='json') for user in users]
+            
+            logger.info(f"Retrieved {len(users_data)} users out of {total} total")
+            
+            # Prepare structured response data
+            users_list_data = UsersListData(
+                users=users_data,
+                total=total,
+                skip=skip,
+                limit=limit
+            )
+            
+            return {
+                "success": True,
+                "message": f"Retrieved {len(users_data)} users",
+                "data": users_list_data.model_dump(mode='json')
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting users for admin: {str(e)}")
+            return {
+                "success": False,
+                "message": "Internal server error",
+                "status_code": 500,
+                "errors": ["Failed to retrieve users"],
+                "error_code": "INTERNAL_ERROR"
+            }
 
 
 user_crud = UserCRUD()

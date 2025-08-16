@@ -3,7 +3,7 @@ import jwt
 from datetime import datetime, timedelta
 from uuid import UUID
 from typing import Optional
-from passlib.context import CryptContext
+
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -12,19 +12,12 @@ from sqlalchemy.orm import Session
 from app.core.configs import settings
 from app.crud.user import user_crud
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 # Token settings
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
 
 class AuthService:
-    def verify_password(self, plain_password: str, hashed_password: str) -> bool:
-        return pwd_context.verify(plain_password, hashed_password)
-    
-    def get_password_hash(self, password: str) -> str:
-        return pwd_context.hash(password)
+
     
     def create_access_token(self, user_id: UUID) -> dict:
         expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -71,19 +64,7 @@ class AuthService:
         except jwt.PyJWTError:
             return None
     
-    def authenticate_user(self, db: Session, email: str, password: str):
-        user = user_crud.get_by_email(db, email)
-        if not user:
-            return False
-        if not user.password_hash:
-            return False
-        if not self.verify_password(password, user.password_hash):
-            return False
-        return user
-    
-    def check_user_exists(self, db: Session, email: str):
-        """Check if user exists by email"""
-        return user_crud.get_by_email(db, email) is not None
+
 
 
 auth_service = AuthService()

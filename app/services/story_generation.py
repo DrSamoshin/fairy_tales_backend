@@ -3,7 +3,7 @@ from typing import Dict, Any, AsyncGenerator
 from openai import AsyncOpenAI
 
 from app.core.configs import settings
-from app.schemas.story import StoryGenerate
+from app.schemas.story import StoryGenerateRequest
 
 
 class StoryGenerationService:
@@ -13,12 +13,12 @@ class StoryGenerationService:
         self.logger = logging.getLogger(__name__)
         self.client = AsyncOpenAI(api_key=settings.openai.API_KEY)
     
-    async def generate_story(self, story_params: StoryGenerate) -> str:
+    async def generate_story(self, story_params: StoryGenerateRequest) -> str:
         """
         Generate a fairy tale story based on provided parameters using OpenAI.
         
         Args:
-            story_params: StoryGenerate object with all story parameters
+            story_params: StoryGenerateRequest object with all story parameters
             
         Returns:
             str: Generated story content
@@ -49,12 +49,12 @@ class StoryGenerationService:
             self.logger.error(f"Error generating story: {str(e)}")
             raise Exception(f"Failed to generate story: {str(e)}")
     
-    async def generate_story_stream(self, story_params: StoryGenerate) -> AsyncGenerator[str, None]:
+    async def generate_story_stream(self, story_params: StoryGenerateRequest) -> AsyncGenerator[str, None]:
         """
         Generate a fairy tale story with streaming response.
         
         Args:
-            story_params: StoryGenerate object with all story parameters
+            story_params: StoryGenerateRequest object with all story parameters
             
         Yields:
             str: Chunks of generated story content
@@ -127,10 +127,13 @@ FORMAT REQUIREMENTS:
 - NO headers, bold text, or special formatting
 - Use simple paragraphs separated by line breaks
 - Present the story as continuous narrative text
+- DO NOT end stories with "The End", "Конец", "Fin", "Finale" or similar ending phrases
+- Stories should conclude naturally with the final narrative sentence
+- Use ONLY short dashes (-) for punctuation, NOT long em-dashes (—) or en-dashes (–)
 
 Remember: You are creating magical, safe, and enriching experiences for young minds."""
 
-    def _build_prompt(self, story_params: StoryGenerate) -> str:
+    def _build_prompt(self, story_params: StoryGenerateRequest) -> str:
         """Build the user prompt with story parameters"""
         
         # Age-appropriate guidelines
@@ -148,6 +151,8 @@ STORY DETAILS:
 - Target age: {story_params.age} years old
 - Language: {story_params.language.value.upper()}
 - Style: {story_params.story_style.value}
+- Story length: {story_params.story_length.value} (1=very short, 2=short, 3=medium, 4=long, 5=very long)
+- Target child gender: {story_params.child_gender.value}
 
 AGE REQUIREMENTS:
 {age_guidance}
@@ -156,12 +161,15 @@ LANGUAGE REQUIREMENTS:
 {language_guidance}
 
 STORY REQUIREMENTS:
-- Length: Approximately 800-1200 words
+- Length: {self._get_length_guidance(story_params.story_length.value)}
 - Include traditional fairy tale elements and magical moments
 - Make {story_params.hero_name} a relatable and positive role model
 - Incorporate the story idea naturally into the plot
 - End with a clear moral lesson appropriate for the age group
 - Use rich, descriptive language that helps children visualize the story
+- IMPORTANT: Do NOT end with "The End" or equivalent phrases - let the story conclude naturally
+- Use simple punctuation: short dashes (-) only, avoid long dashes (—) or special symbols
+- Consider the target child gender ({story_params.child_gender.value}) when choosing themes and references
 
 Please write the complete fairy tale now."""
         
@@ -173,7 +181,7 @@ Please write the complete fairy tale now."""
             return """- Use very simple sentences and basic vocabulary
 - Focus on concrete concepts and familiar situations
 - Include repetitive elements and simple rhymes
-- Story should be 5-8 minutes reading time
+- Story should be 2-3 minutes reading time
 - Emphasize basic concepts like colors, numbers, animals
 - Very gentle conflicts with immediate, happy solutions"""
         
@@ -181,7 +189,7 @@ Please write the complete fairy tale now."""
             return """- Use clear, engaging sentences with expanded vocabulary
 - Include some adventure but keep it safe and non-threatening
 - Add simple problem-solving elements
-- Story should be 8-12 minutes reading time
+- Story should be 3-4 minutes reading time
 - Can include mild suspense that quickly resolves positively
 - Focus on friendship, sharing, and basic life lessons"""
         
@@ -189,7 +197,7 @@ Please write the complete fairy tale now."""
             return """- Use rich vocabulary and more complex sentence structures
 - Include character development and emotional growth
 - Add meaningful challenges that teach resilience
-- Story should be 12-15 minutes reading time
+- Story should be 4-5 minutes reading time
 - Can explore themes of courage, honesty, and perseverance
 - Include subtle moral lessons woven into the narrative"""
         
@@ -197,7 +205,7 @@ Please write the complete fairy tale now."""
             return """- Use sophisticated language and narrative techniques
 - Explore deeper themes while maintaining appropriateness
 - Include complex character relationships and growth
-- Story should be 15-20 minutes reading time
+- Story should be 5-6 minutes reading time
 - Address more nuanced moral and ethical concepts
 - Prepare for transition to young adult themes"""
     
@@ -211,6 +219,17 @@ Please write the complete fairy tale now."""
             "de": "Schreiben Sie in klarem, ansprechendem Deutsch mit korrekter Grammatik und reichem Wortschatz, der für deutschsprachige Kinder geeignet ist."
         }
         return guidance.get(language, guidance["en"])
+    
+    def _get_length_guidance(self, story_length: int) -> str:
+        """Get length-specific guidance for story generation"""
+        length_guidance = {
+            1: "Approximately 100-200 words (very short story)",
+            2: "Approximately 200-300 words (short story)",
+            3: "Approximately 300-400 words (medium story)",
+            4: "Approximately 400-500 words (long story)",
+            5: "Approximately 500-600 words (very long story)"
+        }
+        return length_guidance.get(story_length, length_guidance[3])
 
 
 # Create service instance

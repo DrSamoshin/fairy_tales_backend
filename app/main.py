@@ -11,7 +11,6 @@ from app.api.endpoints.v1 import (
     router_admin,
     router_migration,
     router_auth,
-    router_user,
     router_stories,
     router_legal,
 )
@@ -29,7 +28,6 @@ main_app.add_middleware(DatabaseMonitoringMiddleware)
 main_app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://coffee-point-crm.web.app",
         "http://localhost:5173",  # для Vite dev server
     ],
     allow_credentials=True,
@@ -84,11 +82,10 @@ def custom_openapi():
 
 main_app.openapi = custom_openapi
 
-main_app.include_router(router_health, prefix="/api/v1")
 main_app.include_router(router_auth, prefix="/api/v1")
-main_app.include_router(router_user, prefix="/api/v1")
 main_app.include_router(router_stories, prefix="/api/v1")
 main_app.include_router(router_legal, prefix="/api/v1")
+main_app.include_router(router_health, prefix="/api/v1")
 
 # admin
 if settings.run.ADMIN_MODE:
@@ -98,4 +95,4 @@ if settings.run.ADMIN_MODE:
 
 logging.info("admin mode: %s", settings.run.ADMIN_MODE)
 logging.info("starting FastAPI")
-logging.info("DB url: %s", settings.data_base.get_db_url("users"))
+logging.info("DB url: %s", settings.data_base.get_db_url())

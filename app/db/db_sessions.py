@@ -100,7 +100,7 @@ def _get_users_db_engine():
         if not USERS_DB_ENGINES.get("users"):
             try:
                 users_db_engine = _create_db_engine(
-                    settings.data_base.get_db_url("users")
+                    settings.data_base.get_db_url()
                 )
             except Exception as error:
                 raise error

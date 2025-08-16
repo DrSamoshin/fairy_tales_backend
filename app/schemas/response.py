@@ -1,5 +1,7 @@
 from pydantic import BaseModel
-from typing import Any, Optional
+from typing import Any, Optional, List
+from uuid import UUID
+from datetime import datetime
 
 
 class BaseResponse(BaseModel):
@@ -11,8 +13,15 @@ class DataResponse(BaseResponse):
     data: Any
 
 
+# Auth-related responses
+class AuthData(BaseModel):
+    """Structured auth response data"""
+    user: dict  # UserOut or UserSummary
+    token: dict  # Token
+
+
 class AuthResponse(BaseResponse):
-    data: dict  # Contains user and token
+    data: AuthData
 
 
 class StoriesListResponse(BaseResponse):
@@ -23,12 +32,19 @@ class StoryResponse(BaseResponse):
     data: dict  # Contains story
 
 
-class UserProfileResponse(BaseResponse):
-    data: dict  # Contains profile
+
+
+# User-related responses  
+class UsersListData(BaseModel):
+    """Structured users list response data"""
+    users: List[dict]  # List of UserOut
+    total: int
+    skip: int
+    limit: int
 
 
 class UsersListResponse(BaseResponse):
-    data: dict  # Contains users list and pagination info
+    data: UsersListData
 
 
 class PolicyResponse(BaseResponse):

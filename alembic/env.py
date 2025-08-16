@@ -49,7 +49,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = settings.data_base.get_db_url("users")
+    url = settings.data_base.get_db_url()
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -69,7 +69,7 @@ def run_migrations_online() -> None:
 
     """
     # Use our custom database URL configuration
-    database_url = settings.data_base.get_db_url("users")
+    database_url = settings.data_base.get_db_url()
     connectable = create_engine(database_url, poolclass=pool.NullPool)
 
     with connectable.connect() as connection:

@@ -4,40 +4,30 @@ from datetime import datetime
 from typing import Optional, List
 
 
-class UserBase(BaseModel):
-    name: str
-
-
-class UserRegister(UserBase):
-    email: EmailStr
-    password: str
-
-
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
-
-
-class AppleSignIn(UserBase):
+class AppleSignIn(BaseModel):
     apple_id: str
-    
-
-class UserUpdate(BaseModel):
-    name: Optional[str] = None
+    name: str  # Display name from Apple/client (not stored in DB)
+    identity_token: Optional[str] = None  # JWT token from Apple Sign In
 
 
-class UserOut(UserBase):
+class UserOut(BaseModel):
+    """User output schema - only essential data"""
     id: UUID
-    email: Optional[str]
+    apple_id: str
+    email: Optional[str] = None
     is_active: bool
     created_at: datetime
-    updated_at: datetime
 
     model_config = {"from_attributes": True}
 
 
-class UserProfile(UserOut):
-    stories_count: Optional[int] = None
+class UserSummary(BaseModel):
+    """Minimal user summary for responses (without sensitive data)"""
+    id: UUID
+    is_active: bool
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
 
 
 class Token(BaseModel):

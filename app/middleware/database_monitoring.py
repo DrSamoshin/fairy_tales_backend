@@ -185,8 +185,7 @@ class DatabaseMonitoringMiddleware(BaseHTTPMiddleware):
             "/api/v1/auth",
             "/api/v1/user",
             "/api/v1/stories",
-            "/api/v1/admin",
-            "/api/v1/health/db"
+            "/api/v1/admin"
         ]
         
         return any(path.startswith(endpoint) for endpoint in database_endpoints)

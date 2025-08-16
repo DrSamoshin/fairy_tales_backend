@@ -10,18 +10,19 @@ class OrderPaymentMethod(str, Enum):
 IOS_POLICY = """
 # Privacy Policy
 
-**Effective date:** 2025-08-15
+**Effective date:** 2025-08-16
 
-This Privacy Policy describes how the Fairy Tales application (“Application”, “we”, “our”, or “us”) collects, uses, and protects your information.  
+This Privacy Policy describes how the Fairy Tales application ("Application", "we", "our", or "us") collects, uses, and protects your information.  
 The Application is intended for parents and does not collect any information from or about children.
 
 ## 1. Information We Collect
-When you register an account, we collect:
-- Email address
-- Hashed password (we do not store your plain password)
-- Apple ID identifier if you use Apple Sign In
+When you sign in to your account, we collect:
+- Apple ID identifier (through Apple Sign In authentication)
+- Email address (if provided by Apple, optional)
+- Name (if provided by Apple, for display purposes only)
 
 Additionally, the Application collects:
+- Generated fairy tale stories that you create
 - Error reports and technical logs to improve stability
 - Usage analytics (e.g., which features are used)
 
@@ -29,11 +30,11 @@ No information about children is collected.
 
 ## 2. How We Use Your Information
 We use the collected information to:
-- Create and maintain your account
-- Authenticate you via email/password or Apple Sign In
-- Provide access to your generated stories
+- Create and maintain your account through Apple Sign In
+- Authenticate you securely via Apple's authentication system
+- Store and provide access to your generated stories
 - Improve the Application through analytics and error reporting
-- Process subscription payments through Apple
+- Process subscription payments through Apple's in-app purchase system
 
 ## 3. Generated Stories
 When you create a story, it is stored securely on our servers in Google Cloud (Europe).  
@@ -58,8 +59,8 @@ We do not store or process your payment information.
 - Technical logs are stored for a limited time for troubleshooting and then deleted.
 
 ## 7. Security
-We store your password only in a hashed form.  
-We use encryption and security best practices to protect your data.  
+Your authentication is handled securely through Apple's Sign In system - we do not store passwords.  
+We use encryption and security best practices to protect your data on our servers.  
 However, no system is 100% secure, and we cannot guarantee absolute security.
 
 ## 8. Changes to This Policy
@@ -76,16 +77,16 @@ If you have any questions about privacy or this policy, please contact us:
 TERMS_OF_USE = """
 # Terms of Use
 
-**Effective date:** 2025-08-15
+**Effective date:** 2025-08-16
 
-These Terms of Use (“Terms”) govern your use of the Fairy Tales application (“Application”, “we”, “our”, or “us”). By downloading, accessing, or using the Application, you agree to be bound by these Terms. If you do not agree, please do not use the Application.
+These Terms of Use ("Terms") govern your use of the Fairy Tales application ("Application", "we", "our", or "us"). By downloading, accessing, or using the Application, you agree to be bound by these Terms. If you do not agree, please do not use the Application.
 
 ## 1. Eligibility
 The Application is intended for parents. You must be at least 18 years old to create an account and use the Application.
 
 ## 2. Account Registration
-To access certain features, you must create an account by providing your email and password or by using Apple Sign In.  
-You are responsible for maintaining the confidentiality of your login information and for all activities under your account.
+To access the Application, you must sign in using Apple Sign In.  
+You are responsible for maintaining the security of your Apple ID and for all activities under your account.
 
 ## 3. Subscription and Payment
 - The Application offers paid subscriptions processed exclusively through **Apple’s in-app purchase system**.
