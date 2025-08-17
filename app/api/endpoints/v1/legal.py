@@ -1,9 +1,16 @@
 import logging
-from fastapi import APIRouter
+import os
 
+import markdown
+from pathlib import Path
+from fastapi import APIRouter
+from fastapi.responses import HTMLResponse
 from app.core.responses import response
 from app.core.consts import IOS_POLICY, TERMS_OF_USE
 from app.schemas.response import PolicyResponse
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
+contents = os.listdir(BASE_DIR)
 
 router = APIRouter(prefix="/legal", tags=["legal"])
 
@@ -28,3 +35,12 @@ async def get_terms_of_use():
         message="Terms of Use retrieved successfully",
         data={"terms": TERMS_OF_USE}
     )
+
+
+@router.get("/policies/", response_class=HTMLResponse)
+async def get_ios_policy():
+    logging.info("iOS policies requested")
+    with open(f"{BASE_DIR}/privacy-policy.md", "r", encoding="utf-8") as f:
+        md_text = f.read()
+    html = markdown.markdown(md_text)
+    return f"<html><body>{html}</body></html>"

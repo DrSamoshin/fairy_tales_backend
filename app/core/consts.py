@@ -8,7 +8,7 @@ class OrderPaymentMethod(str, Enum):
 
 # iOS Policy Content
 IOS_POLICY = """
-# Privacy Policy
+#Privacy Policy
 
 **Effective date:** 2025-08-16
 
@@ -70,8 +70,8 @@ You will be notified of significant changes within the Application or via email.
 ## 9. Contact Us
 If you have any questions about privacy or this policy, please contact us:  
 **Email:** gds.grey@gmail.com
+**Developer:** Siarhei Samoshyn
 """
-
 
 # Terms of Use Content
 TERMS_OF_USE = """
