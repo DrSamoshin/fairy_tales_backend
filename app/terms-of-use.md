@@ -1,4 +1,4 @@
-# Fairy Tales — Terms of Use
+# Fairy Tales
 
 ## English - Terms of Use
 
@@ -102,7 +102,7 @@ If you have questions about these Terms, contact us at:
 ### 9. Контакты
 По всем вопросам:  
 **Email:** gds.grey@gmail.com  
-**Разработчик:** Сяргей Самошын
+**Разработчик:** Siarhei Samoshyn
 
 ---
 

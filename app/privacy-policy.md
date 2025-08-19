@@ -1,4 +1,4 @@
-# Fairy Tales — Privacy Policy
+# Fairy Tales
 
 ## English — Privacy Policy
 
