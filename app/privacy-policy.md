@@ -254,7 +254,7 @@ Wir können diese Richtlinie aktualisieren
 
 ---
 
-## Español (España) — Política de Privacidad
+## Español — Política de Privacidad
 
 **Fecha de entrada en vigor:** 16 de agosto de 2025
 

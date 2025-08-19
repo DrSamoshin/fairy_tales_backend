@@ -37,10 +37,19 @@ async def get_terms_of_use():
     )
 
 
-@router.get("/policies/", response_class=HTMLResponse)
-async def get_ios_policy():
-    logging.info("iOS policies requested")
+@router.get("/privacy-policy/", response_class=HTMLResponse)
+async def get_privacy_policy():
+    logging.info("get_privacy_policy")
     with open(f"{BASE_DIR}/privacy-policy.md", "r", encoding="utf-8") as f:
+        md_text = f.read()
+    html = markdown.markdown(md_text)
+    return f"<html><body>{html}</body></html>"
+
+
+@router.get("/terms-of-use/", response_class=HTMLResponse)
+async def get_terms_of_use():
+    logging.info("get_terms_of_use")
+    with open(f"{BASE_DIR}/terms-of-use.md", "r", encoding="utf-8") as f:
         md_text = f.read()
     html = markdown.markdown(md_text)
     return f"<html><body>{html}</body></html>"

@@ -1,11 +1,10 @@
 import logging
 import json
-from typing import Dict, Any, Optional, AsyncGenerator
+from typing import Dict, Any, AsyncGenerator
 from uuid import UUID
 from sqlalchemy.orm import Session
 
 from app.schemas.story import StoryGenerateRequest, StoryOut
-from app.schemas.response import StoryResponse, StoriesListResponse
 from app.crud.story import story_crud
 from app.core import error_codes
 

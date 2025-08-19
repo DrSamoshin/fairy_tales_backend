@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import StreamingResponse

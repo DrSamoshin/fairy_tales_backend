@@ -124,4 +124,5 @@ Continued use of the Application after changes means you accept the new Terms.
 ## 9. Contact Us
 If you have questions about these Terms, contact us at:  
 **Email:** gds.grey@gmail.com
+**Developer:** Siarhei Samoshyn
 """
