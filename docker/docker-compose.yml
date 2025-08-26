@@ -1,25 +1,25 @@
 services:
-#  web:
-#    build:
-#      context: ..
-#      dockerfile: docker/Dockerfile
-#    container_name: fairy_tales
-#    ports:
-#      - "8080:8080"
-#    env_file:
-#      - .env
-#    environment:
-#      USE_CLOUD_SQL_PROXY: false
-#      ADMIN_MODE: true
-#      DB_HOST: db
-#      DB_PORT: 5432
-#      DB_USER: ${DB_USER}
-#      DB_PASS: ${DB_PASS}
-#      DB_NAME: ${DB_NAME}
-#      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-#      OPENAI_API_KEY: ${OPENAI_API_KEY}
-#    depends_on:
-#      - db
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: fairy_tales
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      USE_CLOUD_SQL_PROXY: false
+      ADMIN_MODE: true
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    depends_on:
+      - db
 
   db:
     image: postgres:15
