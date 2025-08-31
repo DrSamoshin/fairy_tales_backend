@@ -150,47 +150,32 @@ class UserCRUD:
         
         return users_with_counts, total
     
-    def get_users_for_admin(
-        self, 
-        db: Session, 
-        skip: int = 0, 
-        limit: int = 100
-    ) -> Dict[str, Any]:
+    def get_users_for_admin(self, db: Session) -> Dict[str, Any]:
         """
-        Get users list for admin with structured response.
+        Get all users for admin with structured response.
         
         Args:
             db: Database session
-            skip: Number of users to skip
-            limit: Maximum number of users to return
             
         Returns:
             Dict with success status, message, and structured data
         """
         logger = logging.getLogger(__name__)
-        logger.info(f"Admin requesting users list with skip={skip}, limit={limit}")
+        logger.info("Admin requesting all users list")
         
         try:
-            # Get users from database
-            users, total = self.get_all(db, skip=skip, limit=limit)
+            # Get all users from database
+            users = db.query(User).filter(User.is_active == True).order_by(desc(User.created_at)).all()
             
             # Convert users to UserOut format
             users_data = [UserOut.model_validate(user).model_dump(mode='json') for user in users]
             
-            logger.info(f"Retrieved {len(users_data)} users out of {total} total")
-            
-            # Prepare structured response data
-            users_list_data = UsersListData(
-                users=users_data,
-                total=total,
-                skip=skip,
-                limit=limit
-            )
+            logger.info(f"Retrieved {len(users_data)} users")
             
             return {
                 "success": True,
                 "message": f"Retrieved {len(users_data)} users",
-                "data": users_list_data.model_dump(mode='json')
+                "data": {"users": users_data}
             }
             
         except Exception as e:

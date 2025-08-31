@@ -10,7 +10,6 @@ logging.basicConfig(
 )
 
 
-
 def run():
     logging.info("check DB")
     try:

@@ -12,6 +12,7 @@ from app.api.endpoints.v1 import (
     router_migration,
     router_auth,
     router_stories,
+    router_heroes,
     router_legal,
 )
 
@@ -84,6 +85,7 @@ main_app.openapi = custom_openapi
 
 main_app.include_router(router_auth, prefix="/api/v1")
 main_app.include_router(router_stories, prefix="/api/v1")
+main_app.include_router(router_heroes, prefix="/api/v1")
 main_app.include_router(router_legal, prefix="/api/v1")
 main_app.include_router(router_health, prefix="/api/v1")
 

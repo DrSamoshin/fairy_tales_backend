@@ -32,6 +32,21 @@ class StoryResponse(BaseResponse):
     data: dict  # Contains story
 
 
+# Hero-related responses
+class HeroesListData(BaseModel):
+    """Structured heroes list response data"""
+    heroes: List[dict]  # List of HeroOut or HeroSummary
+    pagination: dict  # Contains skip, limit, count, total
+
+
+class HeroesListResponse(BaseResponse):
+    data: HeroesListData
+
+
+class HeroResponse(BaseResponse):
+    data: dict  # Contains hero
+
+
 
 
 # User-related responses  

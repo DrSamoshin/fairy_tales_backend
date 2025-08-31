@@ -3,6 +3,7 @@ from uuid import UUID
 from datetime import datetime
 from typing import Optional, List
 from enum import Enum
+from app.schemas.hero import HeroOut
 
 
 class StoryStyle(str, Enum):
@@ -28,66 +29,41 @@ class StoryLength(int, Enum):
     VERY_LONG = 5   # ~500-600 words
 
 
-class ChildGender(str, Enum):
-    BOY = "boy"
-    GIRL = "girl"
-
-
-class StoryBase(BaseModel):
-    title: str
-
-
-class StoryGenerateRequest(BaseModel):
-    """Unified schema for both generate and generate-stream endpoints"""
+class StoryGenerateWithHeroesRequest(BaseModel):
+    """Schema for generating stories with multiple heroes"""
     story_name: str = Field(..., description="Name/title of the story")
-    hero_name: str = Field(..., description="Name of the main character")
-    age: int = Field(..., ge=3, le=16, description="Age of the target audience (3-16 years)")
+    story_idea: str = Field(..., description="Main idea or plot of the story")
     story_style: StoryStyle = Field(..., description="Style/genre of the story")
     language: Language = Field(default=Language.ENGLISH, description="Language for the story")
-    story_idea: str = Field(..., description="Main idea or plot of the story")
     story_length: StoryLength = Field(default=StoryLength.MEDIUM, description="Length of the story (1-5, where 3 is medium)")
-    child_gender: ChildGender = Field(..., description="Gender of the target child reader (boy/girl)")
+    heroes: List[HeroOut] = Field(..., description="List of heroes to include in the story", min_length=1)
 
 
-# Legacy alias for backward compatibility
-StoryGenerate = StoryGenerateRequest
-
-
-
-
-
-class StoryOut(StoryBase):
+class StoryOut(BaseModel):
+    """Complete story output schema"""
     id: UUID
     user_id: UUID
+    title: str
     content: str
-    hero_name: str
-    age: int
     story_style: str
     language: str
     story_idea: str
     story_length: int
-    child_gender: str
+    hero_names: Optional[List[str]] = None
     created_at: datetime
 
     model_config = {"from_attributes": True}
 
 
 class StoryListItem(BaseModel):
-    """Minimal story info for lists (compact view)"""
+    """Minimal story info for lists"""
     id: UUID
+    user_id: UUID
     title: str
-    hero_name: str
     story_style: str
     language: str
-    age: int
+    story_idea: str
     created_at: datetime
+    hero_names: Optional[List[str]] = None
 
     model_config = {"from_attributes": True}
-
-
-class StoriesListData(BaseModel):
-    """Structured data for stories list response"""
-    stories: List[StoryOut]  # Use full StoryOut for complete information
-    total: int
-    skip: int
-    limit: int

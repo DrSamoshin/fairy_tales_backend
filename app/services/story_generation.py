@@ -1,9 +1,10 @@
 import logging
-from typing import Dict, Any, AsyncGenerator
+from typing import Dict, Any, AsyncGenerator, List
 from openai import AsyncOpenAI
 
 from app.core.configs import settings
-from app.schemas.story import StoryGenerateRequest
+from app.schemas.story import StoryGenerateWithHeroesRequest
+from app.schemas.hero import HeroOut
 
 
 class StoryGenerationService:
@@ -13,21 +14,22 @@ class StoryGenerationService:
         self.logger = logging.getLogger(__name__)
         self.client = AsyncOpenAI(api_key=settings.openai.API_KEY)
     
-    async def generate_story(self, story_params: StoryGenerateRequest) -> str:
+
+    async def generate_story_with_heroes(self, story_params: StoryGenerateWithHeroesRequest) -> str:
         """
-        Generate a fairy tale story based on provided parameters using OpenAI.
+        Generate a fairy tale story with multiple heroes.
         
         Args:
-            story_params: StoryGenerateRequest object with all story parameters
+            story_params: StoryGenerateWithHeroesRequest object with heroes list
             
         Returns:
             str: Generated story content
         """
-        self.logger.info(f"Generating story: {story_params.story_name}")
+        self.logger.info(f"Generating story with heroes: {story_params.story_name}")
         
         try:
-            # Build the prompt for OpenAI
-            prompt = self._build_prompt(story_params)
+            # Build the prompt for OpenAI with heroes
+            prompt = self._build_prompt_with_heroes(story_params)
             
             # Call OpenAI API
             response = await self.client.chat.completions.create(
@@ -41,31 +43,39 @@ class StoryGenerationService:
             )
             
             story_content = response.choices[0].message.content
-            self.logger.info(f"Generated story of {len(story_content)} characters")
+            self.logger.info(f"Generated story with heroes of {len(story_content)} characters")
             
             return story_content
             
         except Exception as e:
-            self.logger.error(f"Error generating story: {str(e)}")
-            raise Exception(f"Failed to generate story: {str(e)}")
-    
-    async def generate_story_stream(self, story_params: StoryGenerateRequest) -> AsyncGenerator[str, None]:
+            self.logger.error(f"Error generating story with heroes: {str(e)}")
+            raise Exception(f"Failed to generate story with heroes: {str(e)}")
+
+    async def generate_story_with_heroes_stream(self, story_params: StoryGenerateWithHeroesRequest) -> AsyncGenerator[str, None]:
         """
-        Generate a fairy tale story with streaming response.
+        Generate a fairy tale story with multiple heroes using streaming response.
         
         Args:
-            story_params: StoryGenerateRequest object with all story parameters
+            story_params: StoryGenerateWithHeroesRequest object with heroes list
             
         Yields:
             str: Chunks of generated story content
         """
-        self.logger.info(f"Starting streaming generation for story: {story_params.story_name}")
+        self.logger.info(f"🚀 Starting streaming generation for story with heroes: {story_params.story_name}")
+        self.logger.info(f"📊 Heroes count: {len(story_params.heroes)}")
+        self.logger.info(f"🎯 Story style: {story_params.story_style}, Language: {story_params.language}")
         
         try:
-            # Build the prompt for OpenAI
-            prompt = self._build_prompt(story_params)
+            # Build the prompt for OpenAI with heroes
+            self.logger.info("🔨 Building prompt with heroes...")
+            prompt = self._build_prompt_with_heroes(story_params)
+            self.logger.info(f"📝 Prompt length: {len(prompt)} characters")
+            self.logger.debug(f"📄 Full prompt: {prompt[:500]}...")
             
             # Call OpenAI API with streaming
+            self.logger.info("🌐 Calling OpenAI API for streaming...")
+            self.logger.info(f"🔧 Model: {settings.openai.MODEL}, Max tokens: {settings.openai.MAX_TOKENS}, Temp: {settings.openai.TEMPERATURE}")
+            
             stream = await self.client.chat.completions.create(
                 model=settings.openai.MODEL,
                 messages=[
@@ -77,18 +87,34 @@ class StoryGenerationService:
                 stream=True
             )
             
+            self.logger.info("✅ OpenAI stream created successfully, starting to process chunks...")
+            
+            chunk_count = 0
+            total_content = ""
+            
             # Stream the response
             async for chunk in stream:
+                chunk_count += 1
+                self.logger.debug(f"📦 Processing chunk #{chunk_count}")
+                
                 if chunk.choices[0].delta.content:
                     content = chunk.choices[0].delta.content
-                    self.logger.debug(f"Streaming chunk: {len(content)} characters")
+                    total_content += content
+                    self.logger.debug(f"📤 Yielding chunk: {len(content)} characters")
                     yield content
+                else:
+                    self.logger.debug(f"⚪ Empty chunk #{chunk_count}")
             
-            self.logger.info("Streaming generation completed successfully")
+            self.logger.info(f"🎉 Streaming generation with heroes completed successfully!")
+            self.logger.info(f"📈 Total chunks processed: {chunk_count}")
+            self.logger.info(f"📊 Total content length: {len(total_content)} characters")
             
         except Exception as e:
-            self.logger.error(f"Error in streaming generation: {str(e)}")
-            raise Exception(f"Failed to generate story stream: {str(e)}")
+            self.logger.error(f"❌ Error in streaming generation with heroes: {str(e)}")
+            self.logger.error(f"🔍 Error type: {type(e).__name__}")
+            import traceback
+            self.logger.error(f"📍 Traceback: {traceback.format_exc()}")
+            raise Exception(f"Failed to generate story stream with heroes: {str(e)}")
     
     def _get_system_prompt(self) -> str:
         """
@@ -133,26 +159,42 @@ FORMAT REQUIREMENTS:
 
 Remember: You are creating magical, safe, and enriching experiences for young minds."""
 
-    def _build_prompt(self, story_params: StoryGenerateRequest) -> str:
-        """Build the user prompt with story parameters"""
+    def _build_prompt_with_heroes(self, story_params: StoryGenerateWithHeroesRequest) -> str:
+        """Build the user prompt with story parameters and heroes list"""
+        
+        self.logger.info(f"📝 Building prompt for story: {story_params.story_name}")
+        self.logger.info(f"🦸 Heroes received: {len(story_params.heroes)}")
+        
+        for i, hero in enumerate(story_params.heroes):
+            self.logger.info(f"🦸‍♂️ Hero {i+1}: {hero.name} (age {hero.age}, {hero.gender})")
+        
+        # Determine age from the average of heroes' ages or use youngest hero's age for age-appropriate content
+        hero_ages = [hero.age for hero in story_params.heroes]
+        target_age = min(hero_ages)  # Use youngest hero's age for appropriate content
+        self.logger.info(f"🎯 Target age for content: {target_age}")
         
         # Age-appropriate guidelines
-        age_guidance = self._get_age_specific_guidance(story_params.age)
+        age_guidance = self._get_age_specific_guidance(target_age)
         
         # Language-specific elements
         language_guidance = self._get_language_guidance(story_params.language.value)
+        
+        # Build heroes description
+        self.logger.info("🎭 Formatting heroes for prompt...")
+        heroes_description = self._format_heroes_for_prompt(story_params.heroes)
+        self.logger.info(f"📋 Heroes description length: {len(heroes_description)} chars")
         
         prompt = f"""Create a {story_params.story_style.value.lower()} fairy tale with these specifications:
 
 STORY DETAILS:
 - Title: "{story_params.story_name}"
-- Main character: {story_params.hero_name}
 - Story idea: {story_params.story_idea}
-- Target age: {story_params.age} years old
 - Language: {story_params.language.value.upper()}
 - Style: {story_params.story_style.value}
 - Story length: {story_params.story_length.value} (1=very short, 2=short, 3=medium, 4=long, 5=very long)
-- Target child gender: {story_params.child_gender.value}
+
+MAIN CHARACTERS (HEROES):
+{heroes_description}
 
 AGE REQUIREMENTS:
 {age_guidance}
@@ -163,17 +205,31 @@ LANGUAGE REQUIREMENTS:
 STORY REQUIREMENTS:
 - Length: {self._get_length_guidance(story_params.story_length.value)}
 - Include traditional fairy tale elements and magical moments
-- Make {story_params.hero_name} a relatable and positive role model
-- Incorporate the story idea naturally into the plot
+- Feature ALL the heroes listed above as main characters in the story
+- Give each hero meaningful roles and showcase their unique personalities and powers
+- Create interactions between the heroes that highlight their different strengths
+- Incorporate the story idea naturally into the plot involving all heroes
 - End with a clear moral lesson appropriate for the age group
 - Use rich, descriptive language that helps children visualize the story
 - IMPORTANT: Do NOT end with "The End" or equivalent phrases - let the story conclude naturally
 - Use simple punctuation: short dashes (-) only, avoid long dashes (—) or special symbols
-- Consider the target child gender ({story_params.child_gender.value}) when choosing themes and references
+- Balance the story so all heroes contribute meaningfully to the adventure
 
-Please write the complete fairy tale now."""
+Please write the complete fairy tale now featuring all the heroes working together."""
         
         return prompt
+
+    def _format_heroes_for_prompt(self, heroes: List[HeroOut]) -> str:
+        """Format heroes list for inclusion in the prompt"""
+        heroes_text = ""
+        for i, hero in enumerate(heroes, 1):
+            heroes_text += f"""
+{i}. {hero.name} ({hero.gender}, age {hero.age})
+   - Appearance: {hero.appearance or 'Not specified'}
+   - Personality: {hero.personality or 'Not specified'}
+   - Special Power: {hero.power or 'No special powers'}"""
+        
+        return heroes_text.strip()
     
     def _get_age_specific_guidance(self, age: int) -> str:
         """Get age-specific content guidance"""
