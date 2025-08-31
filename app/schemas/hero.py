@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from uuid import UUID
 from datetime import datetime
 from typing import Optional
@@ -39,7 +39,16 @@ class HeroOut(BaseModel):
     avatar_image: Optional[str] = None
     created_at: datetime
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(
+        ser_json_timedelta="iso8601",
+        ser_json_bytes="utf8",
+        json_encoders={
+            datetime: lambda dt: dt.strftime(
+                "%Y-%m-%dT%H:%M:%S.{:03d}Z".format(int(dt.microsecond / 1000))
+            )
+        },
+        from_attributes=True,
+    )
 
 
 class HeroSummary(BaseModel):
@@ -50,4 +59,13 @@ class HeroSummary(BaseModel):
     age: int
     avatar_image: Optional[str] = None
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(
+        ser_json_timedelta="iso8601",
+        ser_json_bytes="utf8",
+        json_encoders={
+            datetime: lambda dt: dt.strftime(
+                "%Y-%m-%dT%H:%M:%S.{:03d}Z".format(int(dt.microsecond / 1000))
+            )
+        },
+        from_attributes=True,
+    )

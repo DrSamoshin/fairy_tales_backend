@@ -1,7 +1,7 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict
 from uuid import UUID
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 
 
 class AppleSignIn(BaseModel):
@@ -18,7 +18,16 @@ class UserOut(BaseModel):
     is_active: bool
     created_at: datetime
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(
+        ser_json_timedelta="iso8601",
+        ser_json_bytes="utf8",
+        json_encoders={
+            datetime: lambda dt: dt.strftime(
+                "%Y-%m-%dT%H:%M:%S.{:03d}Z".format(int(dt.microsecond / 1000))
+            )
+        },
+        from_attributes=True,
+    )
 
 
 class UserSummary(BaseModel):
@@ -27,7 +36,16 @@ class UserSummary(BaseModel):
     is_active: bool
     created_at: datetime
 
-    model_config = {"from_attributes": True}
+    model_config = ConfigDict(
+        ser_json_timedelta="iso8601",
+        ser_json_bytes="utf8",
+        json_encoders={
+            datetime: lambda dt: dt.strftime(
+                "%Y-%m-%dT%H:%M:%S.{:03d}Z".format(int(dt.microsecond / 1000))
+            )
+        },
+        from_attributes=True,
+    )
 
 
 class Token(BaseModel):
