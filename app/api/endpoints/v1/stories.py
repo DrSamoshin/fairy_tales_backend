@@ -6,7 +6,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.responses import response
-from app.db.db_sessions import get_users_db
+from app.db.db_sessions import get_db
 from app.schemas.story import StoryGenerateWithHeroesRequest
 from app.schemas.response import StoriesListResponse, BaseResponse
 from app.services.authentication import get_current_user
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/stories", tags=["stories"])
 @router.get("/", response_model=StoriesListResponse)
 async def get_user_stories(
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_users_db)
+    db: Session = Depends(get_db)
 ):
     """Get all stories for current user"""
     try:
@@ -45,7 +45,7 @@ async def get_user_stories(
 async def get_story_by_id(
     story_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_users_db)
+    db: Session = Depends(get_db)
 ):
     """Get specific story by ID"""
     
@@ -71,7 +71,7 @@ async def get_story_by_id(
 async def delete_story(
     story_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_users_db)
+    db: Session = Depends(get_db)
 ):
     """Delete story (soft delete)"""
     try:
@@ -103,7 +103,7 @@ async def generate_story_with_heroes_stream(
     story_data: StoryGenerateWithHeroesRequest,
     request: Request,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_users_db)
+    db: Session = Depends(get_db)
 ):
     """Generate a new fairy tale story with multiple heroes using streaming response"""
     logging.info(f"Starting heroes streaming endpoint for user: {current_user.id}")

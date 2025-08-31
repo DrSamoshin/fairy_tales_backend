@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.responses import response
-from app.db.db_sessions import get_users_db
+from app.db.db_sessions import get_db
 from app.schemas.user import AppleSignIn
 from app.schemas.response import AuthResponse
 from app.services.authentication import get_current_user
@@ -16,7 +16,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 @router.post("/apple-signin/", response_model=AuthResponse)
 async def apple_signin(
     apple_data: AppleSignIn,
-    db: Session = Depends(get_users_db)
+    db: Session = Depends(get_db)
 ):
     """Register or login user with Apple Sign In"""
     result = await apple_signin_service.process_apple_signin(db, apple_data)

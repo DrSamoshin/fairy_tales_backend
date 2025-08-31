@@ -1,11 +1,10 @@
 import logging
 from uuid import UUID
-from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.responses import response
-from app.db.db_sessions import get_users_db
+from app.db.db_sessions import get_db
 from app.schemas.hero import HeroCreate, HeroUpdate, HeroOut
 from app.schemas.response import BaseResponse, DataResponse
 from app.services.authentication import get_current_user
@@ -21,7 +20,7 @@ logger = logging.getLogger(__name__)
 async def create_hero(
     hero_data: HeroCreate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_users_db)
+    db: Session = Depends(get_db)
 ):
     """Create a new hero for the current user"""
     logger.info(f"Received hero data: {hero_data}")
@@ -48,7 +47,7 @@ async def create_hero(
 @router.get("/", response_model=DataResponse)
 async def get_user_heroes(
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_users_db)
+    db: Session = Depends(get_db)
 ):
     """Get all heroes for current user"""
     try:
@@ -76,7 +75,7 @@ async def update_hero(
     hero_id: UUID,
     hero_data: HeroUpdate,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_users_db)
+    db: Session = Depends(get_db)
 ):
     """Update a hero"""
     try:
@@ -108,7 +107,7 @@ async def update_hero(
 async def delete_hero(
     hero_id: UUID,
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_users_db)
+    db: Session = Depends(get_db)
 ):
     """Delete a hero (soft delete)"""
     try:

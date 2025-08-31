@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from app.db.models.hero import Hero
 from app.schemas.hero import HeroCreate, HeroUpdate
-from datetime import datetime, timezone
 
 
 class HeroCRUD:

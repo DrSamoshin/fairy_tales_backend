@@ -11,12 +11,9 @@ from threading import Lock
 from app.core.configs import settings
 
 
-USERS_DB_ENGINES = TTLCache(maxsize=10, ttl=3600)
-POINT_DB_ENGINES = TTLCache(maxsize=100, ttl=3600)
-POINT_URLS = TTLCache(maxsize=100, ttl=3600)
+DB_ENGINES = TTLCache(maxsize=100, ttl=3600)
 
-point_engine_lock = Lock()
-user_engine_lock = Lock()
+engine_lock = Lock()
 
 
 def _create_db_engine(url: str, pool_size: int = None, max_overflow: int = None):
@@ -79,42 +76,27 @@ def _get_db_session(user_db_engine):
         return session
 
 
-def check_users_db_availability():
-    logging.info("call method check_users_db_availability")
-    try:
-        users_db_engine = _get_users_db_engine()
-        db = _get_db_session(users_db_engine)
-        logging.info(f"users DB is available, db: {db}")
-    except OperationalError as error:
-        settings.data_base.DB_AVAILABLE = False
-        logging.info(error)
-        logging.error("users DB is not available")
-    except Exception as error:
-        logging.error(f"{error}")
-        raise error
-
-
-def _get_users_db_engine():
-    logging.info("call method _get_users_db_engine")
-    with user_engine_lock:
-        if not USERS_DB_ENGINES.get("users"):
+def _get_db_engine():
+    logging.info("call method _get_db_engine")
+    with engine_lock:
+        if not DB_ENGINES.get("fairy_tales"):
             try:
-                users_db_engine = _create_db_engine(
+                db_engine = _create_db_engine(
                     settings.data_base.get_db_url()
                 )
             except Exception as error:
                 raise error
             else:
-                USERS_DB_ENGINES["users"] = users_db_engine
-        return USERS_DB_ENGINES.get("users")
+                DB_ENGINES["fairy_tales"] = db_engine
+        return DB_ENGINES.get("fairy_tales")
 
 
-def get_users_db():
-    logging.info("call method get_users_db")
+def get_db():
+    logging.info("call method get_db")
     try:
-        users_db_engine = _get_users_db_engine()
-        logging.info(f"USERS_DB_ENGINES: {len(USERS_DB_ENGINES)}")
-        db = _get_db_session(users_db_engine)
+        db_engine = _get_db_engine()
+        logging.info(f"DB_ENGINES: {len(DB_ENGINES)}")
+        db = _get_db_session(db_engine)
     except Exception as error:
         logging.error(f"{error}")
         raise error

@@ -86,11 +86,11 @@ async def get_user_id_from_token(
 
 def get_current_user_dependency():
     """Factory function to create get_current_user dependency with proper import"""
-    from app.db.db_sessions import get_users_db
+    from app.db.db_sessions import get_db
     
     async def get_current_user(
         user_id: UUID = Depends(get_user_id_from_token),
-        db: Session = Depends(get_users_db)
+        db: Session = Depends(get_db)
     ):
         user = user_crud.get_by_id(db, user_id)
         if user is None:

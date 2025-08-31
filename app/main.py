@@ -5,7 +5,6 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from app.core.configs import settings
-from app.middleware.database_monitoring import DatabaseMonitoringMiddleware
 from app.api.endpoints.v1 import (
     router_health,
     router_admin,
@@ -21,9 +20,6 @@ contents = os.listdir(BASE_DIR)
 main_app = FastAPI(
     openapi_version=settings.app_data.openapi_version,
 )
-
-# Add database monitoring middleware
-main_app.add_middleware(DatabaseMonitoringMiddleware)
 
 # Add CORS middleware
 main_app.add_middleware(
