@@ -145,7 +145,6 @@ Thumbs.db
 pip-log.txt
 pip-delete-this-directory.txt
 Pipfile.lock
-uv.lock
 poetry.lock
 pdm.lock
 .pypirc

@@ -10,10 +10,10 @@ RUN pip install uv
 WORKDIR /app
 
 # Copy dependency files first for better Docker layer caching
-COPY pyproject.toml ./
+COPY pyproject.toml uv.lock ./
 
 # Install dependencies during build
-RUN uv sync
+RUN uv sync --frozen
 
 # Copy the rest of the application
 COPY . /app
