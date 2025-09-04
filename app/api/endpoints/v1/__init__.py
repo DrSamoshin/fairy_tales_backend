@@ -5,3 +5,5 @@ from app.api.endpoints.v1.auth import router as router_auth
 from app.api.endpoints.v1.stories import router as router_stories
 from app.api.endpoints.v1.heroes import router as router_heroes
 from app.api.endpoints.v1.legal import router as router_legal
+from app.api.endpoints.v1.onboarding import router as router_onboarding
+from app.api.endpoints.v1.users import router as router_users

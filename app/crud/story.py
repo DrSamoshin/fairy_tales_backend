@@ -7,6 +7,8 @@ from app.db.models.story import Story
 from app.db.models.story_hero import StoryHero
 from app.schemas.story import StoryGenerateWithHeroesRequest, StoryOut, StoryListItem
 from app.services.story_generation import story_generation_service
+from app.crud import user_onboarding
+from app.core.consts import OnboardingStep
 
 
 class StoryCRUD:
@@ -97,6 +99,18 @@ class StoryCRUD:
         
         db.commit()
         db.refresh(db_story)
+        
+        # Check if this is user's first story and create onboarding step
+        existing_step = user_onboarding.get_onboarding_step(
+            db, user_id, OnboardingStep.FIRST_STORY_CREATED
+        )
+        if not existing_step:
+            user_onboarding.create_onboarding_step(
+                db=db,
+                user_id=user_id,
+                step_name=OnboardingStep.FIRST_STORY_CREATED
+            )
+        
         return db_story
 
     async def generate_story_with_heroes_stream(

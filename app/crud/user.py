@@ -5,6 +5,8 @@ from sqlalchemy import func, select, and_, desc
 from app.db.models.user import User
 from app.schemas.user import AppleSignIn, UserOut
 from app.schemas.response import UsersListData
+from app.crud import user_onboarding
+from app.core.consts import OnboardingStep
 import logging
 
 
@@ -61,6 +63,14 @@ class UserCRUD:
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
+        
+        # Create initial onboarding step
+        user_onboarding.create_onboarding_step(
+            db=db,
+            user_id=db_user.id,
+            step_name=OnboardingStep.ACCOUNT_CREATED
+        )
+        
         return db_user
     
     def update_user_email(self, db: Session, user_id: UUID, email: Optional[str]) -> Optional[User]:
@@ -76,11 +86,23 @@ class UserCRUD:
     
 
     def deactivate(self, db: Session, user_id: UUID) -> bool:
+        """Soft delete user (deactivate account)"""
         db_user = self.get_by_id(db, user_id)
         if not db_user:
             return False
         
         db_user.is_active = False
+        db.commit()
+        return True
+    
+    def delete_user_permanently(self, db: Session, user_id: UUID) -> bool:
+        """Hard delete user and all related content"""
+        db_user = db.query(User).filter(User.id == user_id).first()
+        if not db_user:
+            return False
+        
+        # Delete user (cascade will handle related content)
+        db.delete(db_user)
         db.commit()
         return True
     

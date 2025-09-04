@@ -18,6 +18,7 @@ class User(BaseUser):
     stories = relationship("Story", back_populates="user", cascade="all, delete-orphan")
     heroes = relationship("Hero", back_populates="user", cascade="all, delete-orphan")
     series = relationship("Series", back_populates="user", cascade="all, delete-orphan")
+    onboarding_progress = relationship("UserOnboardingProgress", back_populates="user", cascade="all, delete-orphan")
 
     __table_args__ = (
         # Primary indexes for Apple authentication

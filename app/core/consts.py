@@ -6,6 +6,14 @@ class OrderPaymentMethod(str, Enum):
     card = "card"
 
 
+class OnboardingStep(str, Enum):
+    """Onboarding steps for user progress tracking"""
+    ACCOUNT_CREATED = "account_created"
+    FIRST_HERO_CREATED = "first_hero_created"
+    FIRST_STORY_CREATED = "first_story_created"
+    FIRST_SERIES_CREATED = "first_series_created"
+
+
 # iOS Policy Content
 IOS_POLICY = """
 #Privacy Policy
@@ -55,7 +63,9 @@ We do not store or process your payment information.
 
 ## 6. Data Retention and Deletion
 - Your account data and generated stories are stored until you request deletion.
-- You can request complete deletion of your account and all associated data by contacting us at **gds.grey@gmail.com**.
+- You can delete your account and all associated data directly in the app using the "Delete Account" button in Settings (Удалить аккаунт, Eliminar Cuenta, Konto löschen, Supprimer le compte).
+- You can also request complete deletion by contacting us at **gds.grey@gmail.com**.
+- When you delete your account, all your data is permanently removed from our servers, including stories, characters, series, and account information.
 - Technical logs are stored for a limited time for troubleshooting and then deleted.
 
 ## 7. Security

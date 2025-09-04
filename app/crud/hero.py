@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from app.db.models.hero import Hero
 from app.schemas.hero import HeroCreate, HeroUpdate
+from app.crud import user_onboarding
+from app.core.consts import OnboardingStep
 
 
 class HeroCRUD:
@@ -22,6 +24,18 @@ class HeroCRUD:
         db.add(db_hero)
         db.commit()
         db.refresh(db_hero)
+        
+        # Check if this is user's first hero and create onboarding step
+        existing_step = user_onboarding.get_onboarding_step(
+            db, user_id, OnboardingStep.FIRST_HERO_CREATED
+        )
+        if not existing_step:
+            user_onboarding.create_onboarding_step(
+                db=db,
+                user_id=user_id,
+                step_name=OnboardingStep.FIRST_HERO_CREATED
+            )
+        
         return db_hero
     
     def get_by_id(self, db: Session, hero_id: UUID, user_id: UUID) -> Optional[Hero]:

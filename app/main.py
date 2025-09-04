@@ -13,6 +13,8 @@ from app.api.endpoints.v1 import (
     router_stories,
     router_heroes,
     router_legal,
+    router_onboarding,
+    router_users,
 )
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -84,6 +86,8 @@ main_app.include_router(router_stories, prefix="/api/v1")
 main_app.include_router(router_heroes, prefix="/api/v1")
 main_app.include_router(router_legal, prefix="/api/v1")
 main_app.include_router(router_health, prefix="/api/v1")
+main_app.include_router(router_onboarding, prefix="/api/v1")
+main_app.include_router(router_users, prefix="/api/v1")
 
 # admin
 if settings.run.ADMIN_MODE:

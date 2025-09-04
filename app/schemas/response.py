@@ -64,3 +64,12 @@ class UsersListResponse(BaseResponse):
 
 class PolicyResponse(BaseResponse):
     data: dict  # Contains policy content
+
+
+# Onboarding-related responses
+class OnboardingProgressResponse(BaseResponse):
+    data: dict  # Contains OnboardingProgressOut
+
+
+class OnboardingStepResponse(BaseResponse):
+    data: dict  # Contains OnboardingStepOut

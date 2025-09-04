@@ -47,7 +47,9 @@ We do not store or process your payment information.
 
 ### 6. Data Retention and Deletion
 - Your account data and generated stories are stored until you request deletion.
-- You can request complete deletion of your account and all associated data by contacting us at **gds.grey@gmail.com**.
+- You can delete your account and all associated data directly in the app using the "Delete Account" button in Settings.
+- You can also request complete deletion by contacting us at **gds.grey@gmail.com**.
+- When you delete your account, all your data is permanently removed from our servers, including stories, characters, series, and account information.
 - Technical logs are stored for a limited time for troubleshooting and then deleted.
 
 ### 7. Security
@@ -110,7 +112,9 @@ You will be notified of significant changes within the Application or via email.
 
 ### 6. Хранение и удаление данных
 - Ваши истории и данные аккаунта хранятся до запроса удаления.
-- Вы можете удалить все данные, написав на **gds.grey@gmail.com**
+- Вы можете удалить свой аккаунт и все связанные данные прямо в приложении через кнопку "Удалить аккаунт" в настройках.
+- Также можете запросить удаление, написав на **gds.grey@gmail.com**
+- При удалении аккаунта все ваши данные навсегда удаляются с наших серверов, включая истории, персонажей, серии и информацию об аккаунте.
 - Технические логи хранятся ограниченное время.
 
 ### 7. Безопасность
@@ -172,8 +176,10 @@ Les abonnements sont gérés **exclusivement via l’App Store**
 Nous ne stockons ni traitons les informations de paiement.
 
 ### 6. Conservation et suppression
-- Vos données sont conservées jusqu’à ce que vous demandiez leur suppression.
-- Pour supprimer votre compte et vos données : **gds.grey@gmail.com**
+- Vos données sont conservées jusqu'à ce que vous demandiez leur suppression.
+- Vous pouvez supprimer votre compte et toutes les données associées directement dans l'application via le bouton "Supprimer le compte" dans les paramètres.
+- Vous pouvez également demander la suppression en contactant : **gds.grey@gmail.com**
+- Lorsque vous supprimez votre compte, toutes vos données sont définitivement supprimées de nos serveurs, y compris les histoires, les personnages, les séries et les informations de compte.
 - Les logs techniques sont conservés temporairement.
 
 ### 7. Sécurité
@@ -236,7 +242,9 @@ Wir speichern oder verarbeiten keine Zahlungsdaten.
 
 ### 6. Speicherung und Löschung
 - Ihre Daten werden gespeichert, bis Sie deren Löschung beantragen.
-- Kontaktieren Sie uns unter **gds.grey@gmail.com**
+- Sie können Ihr Konto und alle zugehörigen Daten direkt in der App über die Schaltfläche "Konto löschen" in den Einstellungen löschen.
+- Sie können die Löschung auch per E-Mail anfordern: **gds.grey@gmail.com**
+- Beim Löschen Ihres Kontos werden alle Ihre Daten dauerhaft von unseren Servern entfernt, einschließlich Geschichten, Charaktere, Serien und Kontoinformationen.
 - Technische Logs werden nur temporär gespeichert.
 
 ### 7. Sicherheit
@@ -299,7 +307,9 @@ No almacenamos ni procesamos información de pago.
 
 ### 6. Retención y eliminación
 - Sus datos se conservan hasta que solicite su eliminación.
-- Puede solicitarla escribiendo a: **gds.grey@gmail.com**
+- Puede eliminar su cuenta y todos los datos asociados directamente en la aplicación usando el botón "Eliminar Cuenta" en la configuración.
+- También puede solicitar la eliminación escribiendo a: **gds.grey@gmail.com**
+- Al eliminar su cuenta, todos sus datos se eliminan permanentemente de nuestros servidores, incluyendo cuentos, personajes, series e información de la cuenta.
 - Los registros técnicos se eliminan tras un tiempo limitado.
 
 ### 7. Seguridad
